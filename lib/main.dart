@@ -47,7 +47,7 @@ class MyApp extends StatelessWidget {
         final isLight = currentTheme == AppTheme.light;
 
         return MaterialApp(
-          title: 'Domino Score',
+          title: 'DominoApp Score Keeper',
           debugShowCheckedModeBanner: false,
           theme: ThemeData(
             colorScheme: ColorScheme.fromSeed(

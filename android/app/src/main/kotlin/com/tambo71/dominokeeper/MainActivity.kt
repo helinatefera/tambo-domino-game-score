@@ -1,4 +1,4 @@
-package com.example.domino.domino_scorer
+package com.tambo71.dominokeeper
 
 import io.flutter.embedding.android.FlutterActivity
 

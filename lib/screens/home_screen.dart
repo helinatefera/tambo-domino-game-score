@@ -1,4 +1,4 @@
-import 'package:domino_scorer/widgets/adsHelper.dart';
+import 'package:domino_scorer/widgets/ads_helper.dart';
 import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -44,7 +44,7 @@ class _HomeScreenState extends State<HomeScreen>
           });
         },
         onAdFailedToLoad: (ad, error) {
-          print("Faile to load banner ad: ${error.message}");
+          debugPrint("Failed to load banner ad: ${error.message}");
           ad.dispose();
         },
       ),

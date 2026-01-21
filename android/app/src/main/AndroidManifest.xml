@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application
-        android:label="Domino Score"
+        android:label="DominoApp Score Keeper"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon">
         <activity
