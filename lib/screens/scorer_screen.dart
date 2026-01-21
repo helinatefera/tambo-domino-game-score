@@ -5,8 +5,7 @@ import '../main.dart';
 import 'ranking_screen.dart';
 import '../widgets/premium_navbar.dart';
 import '../widgets/domino_background.dart';
-import '../widgets/banner_ad_widget.dart';
-import '../utils/ad_helper.dart';
+
 
 class ScorerScreen extends StatefulWidget {
   const ScorerScreen({super.key});
@@ -45,7 +44,7 @@ class ScorerScreenState extends State<ScorerScreen> {
     final numPlayers = prefs.getInt('numberOfPlayers') ?? 2;
     final targetScore = prefs.getInt('targetScore') ?? 100;
     final namesJson = prefs.getString('playerNames');
-    
+
     List<String> names = [];
     if (namesJson != null) {
       try {
@@ -54,19 +53,19 @@ class ScorerScreenState extends State<ScorerScreen> {
         names = [];
       }
     }
-    
+
     while (names.length < numPlayers) {
       names.add('Player ${names.length + 1}');
     }
     if (names.length > numPlayers) {
       names = names.sublist(0, numPlayers);
     }
-    
+
     // Initialize controllers immediately
     for (int i = 0; i < numPlayers; i++) {
       _scoreControllers.add(TextEditingController(text: '0'));
     }
-    
+
     // Set initial state before first build
     if (mounted) {
       setState(() {
@@ -75,7 +74,7 @@ class ScorerScreenState extends State<ScorerScreen> {
         _isLoading = false;
       });
     }
-    
+
     // Then load scores and other data
     await refresh();
   }
@@ -462,39 +461,49 @@ class ScorerScreenState extends State<ScorerScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    BannerAdWidget(
-                      adUnitId: AdHelper.bannerAdUnitId,
-                    ),
+
                     PremiumGlassNavbar(
                       currentIndex: 0,
-                  items: [
-                    NavItem(icon: Icons.videogame_asset_rounded, label: 'Play'),
-                    NavItem(icon: Icons.emoji_events_rounded, label: 'Rank'),
-                    NavItem(icon: Icons.settings_rounded, label: 'Settings'),
-                    NavItem(icon: Icons.help_outline_rounded, label: 'Help'),
-                    NavItem(icon: Icons.share_rounded, label: 'Share'),
-                  ],
-                  onTap: (index) async {
-                    switch (index) {
-                      case 0:
-                        // Already on Scorer
-                        break;
-                      case 1:
-                        Navigator.pushReplacementNamed(context, '/ranking');
-                        break;
-                      case 2:
-                        await Navigator.pushNamed(context, '/settings');
-                        refresh();
-                        break;
-                      case 3:
-                        Navigator.pushNamed(context, '/help');
-                        break;
-                      case 4:
-                        Navigator.pushNamed(context, '/share');
-                        break;
-                    }
-                  },
-                      ),
+                      items: [
+                        NavItem(
+                          icon: Icons.videogame_asset_rounded,
+                          label: 'Play',
+                        ),
+                        NavItem(
+                          icon: Icons.emoji_events_rounded,
+                          label: 'Rank',
+                        ),
+                        NavItem(
+                          icon: Icons.settings_rounded,
+                          label: 'Settings',
+                        ),
+                        NavItem(
+                          icon: Icons.help_outline_rounded,
+                          label: 'Help',
+                        ),
+                        NavItem(icon: Icons.share_rounded, label: 'Share'),
+                      ],
+                      onTap: (index) async {
+                        switch (index) {
+                          case 0:
+                            // Already on Scorer
+                            break;
+                          case 1:
+                            Navigator.pushReplacementNamed(context, '/ranking');
+                            break;
+                          case 2:
+                            await Navigator.pushNamed(context, '/settings');
+                            refresh();
+                            break;
+                          case 3:
+                            Navigator.pushNamed(context, '/help');
+                            break;
+                          case 4:
+                            Navigator.pushNamed(context, '/share');
+                            break;
+                        }
+                      },
+                    ),
                   ],
                 ),
               ),
@@ -672,10 +681,14 @@ class ScorerScreenState extends State<ScorerScreen> {
                     ...List.generate(roundScores.length, (pIndex) {
                       final score = roundScores[pIndex];
                       Color scoreColor = Colors.white;
-                      if (score == maxScoreInRound && score != minScoreInRound)
+                      if (score == maxScoreInRound &&
+                          score != minScoreInRound) {
                         scoreColor = Colors.tealAccent;
-                      if (score == minScoreInRound && score != maxScoreInRound)
+                      }
+                      if (score == minScoreInRound &&
+                          score != maxScoreInRound) {
                         scoreColor = Colors.redAccent.shade100;
+                      }
 
                       return Expanded(
                         flex: 2,

@@ -1,11 +1,11 @@
+import 'package:domino_scorer/widgets/adsHelper.dart';
 import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import '../widgets/premium_navbar.dart';
 import '../widgets/domino_background.dart';
-import '../widgets/banner_ad_widget.dart';
-import '../utils/ad_helper.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -22,6 +22,8 @@ class _HomeScreenState extends State<HomeScreen>
   late Animation<double> _fadeAnimation;
   int _totalGames = 0;
   int _totalWins = 0;
+  // for banner ad
+  BannerAd? _bannerAd;
 
   final List<NavItem> _navItems = [
     NavItem(icon: Icons.videogame_asset_rounded, label: 'Play'),
@@ -31,8 +33,28 @@ class _HomeScreenState extends State<HomeScreen>
     NavItem(icon: Icons.share_rounded, label: 'Share'),
   ];
 
+  void _loadBannerAd() {
+    BannerAd(
+      size: AdSize.banner,
+      adUnitId: AdHelper.bannerAdUnitId,
+      listener: BannerAdListener(
+        onAdLoaded: (ad) {
+          setState(() {
+            _bannerAd = ad as BannerAd;
+          });
+        },
+        onAdFailedToLoad: (ad, error) {
+          print("Faile to load banner ad: ${error.message}");
+          ad.dispose();
+        },
+      ),
+      request: AdRequest(),
+    ).load();
+  }
+
   @override
   void initState() {
+    _loadBannerAd();
     super.initState();
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 1200),
@@ -154,32 +176,29 @@ class _HomeScreenState extends State<HomeScreen>
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    BannerAdWidget(
-                      adUnitId: AdHelper.bannerAdUnitId,
-                    ),
                     PremiumGlassNavbar(
-                  currentIndex: _currentIndex,
-                  items: _navItems,
-                  onTap: (index) {
-                    setState(() => _currentIndex = index);
-                    switch (index) {
-                      case 0:
-                        Navigator.pushNamed(context, '/scorer');
-                        break;
-                      case 1:
-                        Navigator.pushNamed(context, '/ranking');
-                        break;
-                      case 2:
-                        Navigator.pushNamed(context, '/settings');
-                        break;
-                      case 3:
-                        Navigator.pushNamed(context, '/help');
-                        break;
-                      case 4:
-                        Navigator.pushNamed(context, '/share');
-                        break;
-                    }
-                  },
+                      currentIndex: _currentIndex,
+                      items: _navItems,
+                      onTap: (index) {
+                        setState(() => _currentIndex = index);
+                        switch (index) {
+                          case 0:
+                            Navigator.pushNamed(context, '/scorer');
+                            break;
+                          case 1:
+                            Navigator.pushNamed(context, '/ranking');
+                            break;
+                          case 2:
+                            Navigator.pushNamed(context, '/settings');
+                            break;
+                          case 3:
+                            Navigator.pushNamed(context, '/help');
+                            break;
+                          case 4:
+                            Navigator.pushNamed(context, '/share');
+                            break;
+                        }
+                      },
                     ),
                   ],
                 ),
@@ -573,6 +592,13 @@ class _HomeScreenState extends State<HomeScreen>
                           letterSpacing: 1,
                         ),
                       ),
+
+                      if (_bannerAd != null)
+                        SizedBox(
+                          width: _bannerAd!.size.width.toDouble(),
+                          height: _bannerAd!.size.height.toDouble(),
+                          child: AdWidget(ad: _bannerAd!),
+                        ),
                     ],
                   ),
                 ),

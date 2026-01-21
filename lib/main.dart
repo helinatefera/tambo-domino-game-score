@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
+
 import 'screens/home_screen.dart';
 import 'screens/scorer_screen.dart';
 import 'screens/team_settings_screen.dart';
 import 'screens/ranking_screen.dart';
 import 'screens/help_screen.dart';
 import 'screens/share_rate_screen.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 enum AppTheme { light, dark, night }
 
-final ValueNotifier<AppTheme> themeNotifier = ValueNotifier<AppTheme>(AppTheme.dark);
+final ValueNotifier<AppTheme> themeNotifier = ValueNotifier<AppTheme>(
+  AppTheme.dark,
+);
 
 void toggleTheme() {
   if (themeNotifier.value == AppTheme.light) {
@@ -23,28 +26,26 @@ void toggleTheme() {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
-  // Initialize Google Mobile Ads
-  await MobileAds.instance.initialize();
-  
+  MobileAds.instance.initialize();
+
   // Add error handling
   FlutterError.onError = (FlutterErrorDetails details) {
     FlutterError.presentError(details);
   };
-  
+
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
+ 
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<AppTheme>(
       valueListenable: themeNotifier,
       builder: (context, currentTheme, _) {
         final isLight = currentTheme == AppTheme.light;
-        
+
         return MaterialApp(
           title: 'Domino Score',
           debugShowCheckedModeBanner: false,

@@ -4,8 +4,7 @@ import 'dart:convert';
 import '../main.dart';
 import '../widgets/premium_navbar.dart';
 import '../widgets/domino_background.dart';
-import '../widgets/banner_ad_widget.dart';
-import '../utils/ad_helper.dart';
+
 
 class TeamSettingsScreen extends StatefulWidget {
   const TeamSettingsScreen({super.key});
@@ -23,14 +22,6 @@ class _TeamSettingsScreenState extends State<TeamSettingsScreen> {
   final TextEditingController _newPlayerNameController =
       TextEditingController();
   bool _isLoading = true;
-
-  // Theme Definitions
-  final Map<String, List<Color>> _themeColors = {
-    'Golden': [const Color(0xFFFFD700), const Color(0xFFFFD700)],
-    'Classic Green': [const Color(0xFF4CAF50), const Color(0xFF2E7D32)],
-    'Wood': [const Color(0xFF8D6E63), const Color(0xFF5D4037)],
-    'Midnight': [const Color(0xFF2C3E50), const Color(0xFF000000)],
-  };
 
   @override
   void initState() {
@@ -144,13 +135,6 @@ class _TeamSettingsScreenState extends State<TeamSettingsScreen> {
     if (newScore < 0) return;
     setState(() {
       _targetScore = newScore;
-    });
-    _saveSettings();
-  }
-
-  void _updateTheme(String newTheme) {
-    setState(() {
-      _tableTheme = newTheme;
     });
     _saveSettings();
   }
@@ -275,38 +259,48 @@ class _TeamSettingsScreenState extends State<TeamSettingsScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    BannerAdWidget(
-                      adUnitId: AdHelper.bannerAdUnitId,
-                    ),
+
                     PremiumGlassNavbar(
                       currentIndex: 2,
-                  items: [
-                    NavItem(icon: Icons.videogame_asset_rounded, label: 'Play'),
-                    NavItem(icon: Icons.emoji_events_rounded, label: 'Rank'),
-                    NavItem(icon: Icons.settings_rounded, label: 'Settings'),
-                    NavItem(icon: Icons.help_outline_rounded, label: 'Help'),
-                    NavItem(icon: Icons.share_rounded, label: 'Share'),
-                  ],
-                  onTap: (index) {
-                    switch (index) {
-                      case 0:
-                        Navigator.pushReplacementNamed(context, '/scorer');
-                        break;
-                      case 1:
-                        Navigator.pushReplacementNamed(context, '/ranking');
-                        break;
-                      case 2:
-                        // Already on Settings
-                        break;
-                      case 3:
-                        Navigator.pushNamed(context, '/help');
-                        break;
-                      case 4:
-                        Navigator.pushNamed(context, '/share');
-                        break;
-                    }
-                  },
-                      ),
+                      items: [
+                        NavItem(
+                          icon: Icons.videogame_asset_rounded,
+                          label: 'Play',
+                        ),
+                        NavItem(
+                          icon: Icons.emoji_events_rounded,
+                          label: 'Rank',
+                        ),
+                        NavItem(
+                          icon: Icons.settings_rounded,
+                          label: 'Settings',
+                        ),
+                        NavItem(
+                          icon: Icons.help_outline_rounded,
+                          label: 'Help',
+                        ),
+                        NavItem(icon: Icons.share_rounded, label: 'Share'),
+                      ],
+                      onTap: (index) {
+                        switch (index) {
+                          case 0:
+                            Navigator.pushReplacementNamed(context, '/scorer');
+                            break;
+                          case 1:
+                            Navigator.pushReplacementNamed(context, '/ranking');
+                            break;
+                          case 2:
+                            // Already on Settings
+                            break;
+                          case 3:
+                            Navigator.pushNamed(context, '/help');
+                            break;
+                          case 4:
+                            Navigator.pushNamed(context, '/share');
+                            break;
+                        }
+                      },
+                    ),
                   ],
                 ),
               ),
@@ -326,10 +320,7 @@ class _TeamSettingsScreenState extends State<TeamSettingsScreen> {
         borderRadius: BorderRadius.circular(20),
         side: BorderSide(color: colorScheme.onSurface.withValues(alpha: 0.1)),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: child,
-      ),
+      child: Padding(padding: const EdgeInsets.all(16), child: child),
     );
   }
 

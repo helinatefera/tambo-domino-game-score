@@ -3,8 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import '../widgets/premium_navbar.dart';
 import '../widgets/domino_background.dart';
-import '../widgets/banner_ad_widget.dart';
-import '../utils/ad_helper.dart';
+
 
 class RankingScreen extends StatefulWidget {
   const RankingScreen({super.key});
@@ -245,7 +244,7 @@ class _RankingScreenState extends State<RankingScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    BannerAdWidget(adUnitId: AdHelper.bannerAdUnitId),
+
                     PremiumGlassNavbar(
                       currentIndex: 1,
                       items: [

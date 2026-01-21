@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../widgets/premium_navbar.dart';
 import '../widgets/domino_background.dart';
-import '../widgets/banner_ad_widget.dart';
-import '../utils/ad_helper.dart';
+
 
 class HelpScreen extends StatelessWidget {
   const HelpScreen({super.key});
@@ -23,7 +22,9 @@ class HelpScreen extends StatelessWidget {
               colors: [
                 colorScheme.surface.withValues(alpha: 0.7),
                 colorScheme.surface.withValues(alpha: 0.6),
-                Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0.7),
+                Theme.of(
+                  context,
+                ).scaffoldBackgroundColor.withValues(alpha: 0.7),
               ],
             ),
           ),
@@ -31,35 +32,35 @@ class HelpScreen extends StatelessWidget {
             children: [
               SafeArea(
                 child: Column(
-                children: [
-                  _buildHeader(context),
-                  Expanded(
-                    child: ListView(
-                      padding: EdgeInsets.only(
-                        left: 16,
-                        right: 16,
-                        top: 16,
-                        bottom: 120, // Space for Navbar
+                  children: [
+                    _buildHeader(context),
+                    Expanded(
+                      child: ListView(
+                        padding: EdgeInsets.only(
+                          left: 16,
+                          right: 16,
+                          top: 16,
+                          bottom: 120, // Space for Navbar
+                        ),
+                        children: [
+                          _buildSection(
+                            context,
+                            'What is Domino?',
+                            'Domino is a classic tile-based game where players match tiles with the same number of pips. The game is typically played in teams, and players score points by playing tiles that match the open ends of the layout.',
+                          ),
+                          const SizedBox(height: 16),
+                          _buildSection(
+                            context,
+                            'Why This App?',
+                            'This app helps you keep track of scores during your domino games. Instead of using pen and paper, you can easily add points for each team, view scoring history, and save your game results to the leaderboard.',
+                          ),
+                          const SizedBox(height: 16),
+                          _buildFAQSection(context),
+                        ],
                       ),
-                      children: [
-                        _buildSection(
-                          context,
-                          'What is Domino?',
-                          'Domino is a classic tile-based game where players match tiles with the same number of pips. The game is typically played in teams, and players score points by playing tiles that match the open ends of the layout.',
-                        ),
-                        const SizedBox(height: 16),
-                        _buildSection(
-                          context,
-                          'Why This App?',
-                          'This app helps you keep track of scores during your domino games. Instead of using pen and paper, you can easily add points for each team, view scoring history, and save your game results to the leaderboard.',
-                        ),
-                        const SizedBox(height: 16),
-                        _buildFAQSection(context),
-                      ],
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
               ),
               Positioned(
                 bottom: 0,
@@ -68,38 +69,51 @@ class HelpScreen extends StatelessWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    BannerAdWidget(
-                      adUnitId: AdHelper.bannerAdUnitId,
-                    ),
+
                     PremiumGlassNavbar(
                       currentIndex: 3,
-              items: [
-                NavItem(icon: Icons.videogame_asset_rounded, label: 'Play'),
-                NavItem(icon: Icons.emoji_events_rounded, label: 'Rank'),
-                NavItem(icon: Icons.settings_rounded, label: 'Settings'),
-                NavItem(icon: Icons.help_outline_rounded, label: 'Help'),
-                NavItem(icon: Icons.share_rounded, label: 'Share'),
-              ],
-              onTap: (index) {
-                switch (index) {
-                  case 0:
-                    Navigator.pushReplacementNamed(context, '/scorer');
-                    break;
-                  case 1:
-                    Navigator.pushReplacementNamed(context, '/ranking');
-                    break;
-                  case 2:
-                    Navigator.pushReplacementNamed(context, '/settings');
-                    break;
-                  case 3:
-                    // Already on Help
-                    break;
-                  case 4:
-                     Navigator.pushNamed(context, '/share');
-                     break;
-                }
-              },
-                      ),
+                      items: [
+                        NavItem(
+                          icon: Icons.videogame_asset_rounded,
+                          label: 'Play',
+                        ),
+                        NavItem(
+                          icon: Icons.emoji_events_rounded,
+                          label: 'Rank',
+                        ),
+                        NavItem(
+                          icon: Icons.settings_rounded,
+                          label: 'Settings',
+                        ),
+                        NavItem(
+                          icon: Icons.help_outline_rounded,
+                          label: 'Help',
+                        ),
+                        NavItem(icon: Icons.share_rounded, label: 'Share'),
+                      ],
+                      onTap: (index) {
+                        switch (index) {
+                          case 0:
+                            Navigator.pushReplacementNamed(context, '/scorer');
+                            break;
+                          case 1:
+                            Navigator.pushReplacementNamed(context, '/ranking');
+                            break;
+                          case 2:
+                            Navigator.pushReplacementNamed(
+                              context,
+                              '/settings',
+                            );
+                            break;
+                          case 3:
+                            // Already on Help
+                            break;
+                          case 4:
+                            Navigator.pushNamed(context, '/share');
+                            break;
+                        }
+                      },
+                    ),
                   ],
                 ),
               ),
@@ -171,27 +185,33 @@ class HelpScreen extends StatelessWidget {
     final faqs = [
       {
         'question': 'How do I add points?',
-        'answer': 'Tap the quick score buttons (5, 10, 15, 20) or use the + button to enter a custom score. Points are added to the team on the corresponding side.',
+        'answer':
+            'Tap the quick score buttons (5, 10, 15, 20) or use the + button to enter a custom score. Points are added to the team on the corresponding side.',
       },
       {
         'question': 'Can I undo a score?',
-        'answer': 'Yes! Use the undo button (↶) below each team\'s score section to remove the last added score.',
+        'answer':
+            'Yes! Use the undo button (↶) below each team\'s score section to remove the last added score.',
       },
       {
         'question': 'How do I reset the game?',
-        'answer': 'Tap the refresh icon (↻) in the top right corner of the scorer screen to reset all scores.',
+        'answer':
+            'Tap the refresh icon (↻) in the top right corner of the scorer screen to reset all scores.',
       },
       {
         'question': 'How do I save a game to the leaderboard?',
-        'answer': 'Go to the Ranking tab and tap the + button to add a leaderboard entry with the player name and final score.',
+        'answer':
+            'Go to the Ranking tab and tap the + button to add a leaderboard entry with the player name and final score.',
       },
       {
         'question': 'Can I customize player names?',
-        'answer': 'Yes! Go to the Team Settings tab to set the number of players and customize their names and initial points.',
+        'answer':
+            'Yes! Go to the Team Settings tab to set the number of players and customize their names and initial points.',
       },
       {
         'question': 'How do I share the app?',
-        'answer': 'Go to the Share & Rate tab to share the app with friends or rate it on the app store.',
+        'answer':
+            'Go to the Share & Rate tab to share the app with friends or rate it on the app store.',
       },
     ];
 
@@ -217,30 +237,32 @@ class HelpScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            ...faqs.map((faq) => Padding(
-                  padding: const EdgeInsets.only(bottom: 16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        faq['question']!,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: colorScheme.primary,
-                        ),
+            ...faqs.map(
+              (faq) => Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      faq['question']!,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: colorScheme.primary,
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        faq['answer']!,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: colorScheme.onSurface.withValues(alpha: 0.7),
-                        ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      faq['answer']!,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: colorScheme.onSurface.withValues(alpha: 0.7),
                       ),
-                    ],
-                  ),
-                )),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ],
         ),
       ),
