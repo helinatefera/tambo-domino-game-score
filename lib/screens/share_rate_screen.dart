@@ -5,7 +5,6 @@ import 'package:share_plus/share_plus.dart';
 import '../widgets/premium_navbar.dart';
 import '../widgets/domino_background.dart';
 
-
 class ShareRateScreen extends StatelessWidget {
   const ShareRateScreen({super.key});
 
@@ -26,7 +25,7 @@ class ShareRateScreen extends StatelessWidget {
   Future<void> _rateApp() async {
     // Replace with your actual app store URLs
     const androidUrl =
-        'https://play.google.com/store/apps/details?id=com.example.domino_scorer';
+        'https://play.google.com/store/apps/details?id=com.tambo71.domino_score';
     // const iosUrl = 'https://apps.apple.com/app/id123456789';
 
     // You can detect platform and use appropriate URL
@@ -157,7 +156,6 @@ class ShareRateScreen extends StatelessWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-
                     PremiumGlassNavbar(
                       currentIndex: 4,
                       items: [

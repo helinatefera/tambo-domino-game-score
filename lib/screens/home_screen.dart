@@ -592,13 +592,6 @@ class _HomeScreenState extends State<HomeScreen>
                           letterSpacing: 1,
                         ),
                       ),
-
-                      if (_bannerAd != null)
-                        SizedBox(
-                          width: _bannerAd!.size.width.toDouble(),
-                          height: _bannerAd!.size.height.toDouble(),
-                          child: AdWidget(ad: _bannerAd!),
-                        ),
                     ],
                   ),
                 ),
