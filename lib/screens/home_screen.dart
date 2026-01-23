@@ -1,5 +1,6 @@
 import 'package:domino_scorer/widgets/ads_helper.dart';
 import 'package:flutter/material.dart';
+import '../utils/localization.dart';
 import 'dart:ui';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
@@ -21,17 +22,43 @@ class _HomeScreenState extends State<HomeScreen>
   late Animation<double> _scaleAnimation;
   late Animation<double> _fadeAnimation;
   int _totalGames = 0;
-  int _totalWins = 0;
+  String _topWinnerName = '-';
   // for banner ad
   BannerAd? _bannerAd;
 
-  final List<NavItem> _navItems = [
-    NavItem(icon: Icons.videogame_asset_rounded, label: 'Play'),
-    NavItem(icon: Icons.emoji_events_rounded, label: 'Rank'),
-    NavItem(icon: Icons.settings_rounded, label: 'Settings'),
-    NavItem(icon: Icons.help_outline_rounded, label: 'Help'),
-    NavItem(icon: Icons.share_rounded, label: 'Share'),
-  ];
+  Widget _buildNavItems(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return PremiumGlassNavbar(
+      currentIndex: _currentIndex,
+      items: [
+        NavItem(icon: Icons.videogame_asset_rounded, label: l10n.play),
+        NavItem(icon: Icons.emoji_events_rounded, label: l10n.rank),
+        NavItem(icon: Icons.settings_rounded, label: l10n.settings),
+        NavItem(icon: Icons.help_outline_rounded, label: l10n.help),
+        NavItem(icon: Icons.share_rounded, label: l10n.share),
+      ],
+      onTap: (index) {
+        setState(() => _currentIndex = index);
+        switch (index) {
+          case 0:
+            Navigator.pushNamed(context, '/scorer');
+            break;
+          case 1:
+            Navigator.pushNamed(context, '/ranking');
+            break;
+          case 2:
+            Navigator.pushNamed(context, '/settings');
+            break;
+          case 3:
+            Navigator.pushNamed(context, '/help');
+            break;
+          case 4:
+            Navigator.pushNamed(context, '/share');
+            break;
+        }
+      },
+    );
+  }
 
   void _loadBannerAd() {
     BannerAd(
@@ -85,21 +112,28 @@ class _HomeScreenState extends State<HomeScreen>
       final leaderboardJson = prefs.getString('leaderboard');
 
       int totalGames = 0;
-      int totalWins = 0;
+      String topWinner = '-';
+      int maxWins = -1;
 
       if (leaderboardJson != null) {
         final List<dynamic> decoded = json.decode(leaderboardJson);
         for (var entry in decoded) {
           final winCount = (entry['winCount'] ?? 1) as int;
+          final playerName = entry['playerName'] as String;
+          
           totalGames += winCount;
-          totalWins += winCount; // Each win is a game
+          
+          if (winCount > maxWins) {
+            maxWins = winCount;
+            topWinner = playerName;
+          }
         }
       }
 
       if (mounted) {
         setState(() {
           _totalGames = totalGames;
-          _totalWins = totalWins;
+          _topWinnerName = topWinner;
         });
       }
     } catch (e) {
@@ -161,8 +195,15 @@ class _HomeScreenState extends State<HomeScreen>
                           const SizedBox(height: 16),
                           _buildMainButton(isDark),
                           const Spacer(),
+                          if (_bannerAd != null)
+                            Container(
+                              alignment: Alignment.center,
+                              width: _bannerAd!.size.width.toDouble(),
+                              height: _bannerAd!.size.height.toDouble(),
+                              child: AdWidget(ad: _bannerAd!),
+                            ),
                           // Ensure enough space for navbar
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 100),
                         ],
                       );
                     },
@@ -175,32 +216,7 @@ class _HomeScreenState extends State<HomeScreen>
                 right: 0,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
-                  children: [
-                    PremiumGlassNavbar(
-                      currentIndex: _currentIndex,
-                      items: _navItems,
-                      onTap: (index) {
-                        setState(() => _currentIndex = index);
-                        switch (index) {
-                          case 0:
-                            Navigator.pushNamed(context, '/scorer');
-                            break;
-                          case 1:
-                            Navigator.pushNamed(context, '/ranking');
-                            break;
-                          case 2:
-                            Navigator.pushNamed(context, '/settings');
-                            break;
-                          case 3:
-                            Navigator.pushNamed(context, '/help');
-                            break;
-                          case 4:
-                            Navigator.pushNamed(context, '/share');
-                            break;
-                        }
-                      },
-                    ),
-                  ],
+                  children: [_buildNavItems(context)],
                 ),
               ),
             ],
@@ -262,6 +278,7 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   Widget _buildTopBar(bool isDark) {
+    final l10n = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
       child: Row(
@@ -294,7 +311,7 @@ class _HomeScreenState extends State<HomeScreen>
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      'Domino Score',
+                      l10n.dominoScore,
                       style: TextStyle(
                         color: isDark ? Colors.white : Colors.black87,
                         fontWeight: FontWeight.bold,
@@ -456,13 +473,14 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   Widget _buildStatsCards(bool isDark) {
+    final l10n = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Row(
         children: [
           Expanded(
             child: _buildStatCard(
-              'Games',
+              l10n.games,
               '$_totalGames',
               Icons.sports_esports,
               isDark,
@@ -471,8 +489,8 @@ class _HomeScreenState extends State<HomeScreen>
           const SizedBox(width: 12),
           Expanded(
             child: _buildStatCard(
-              'Wins',
-              '$_totalWins',
+              l10n.topPlayer,
+              _topWinnerName,
               Icons.emoji_events,
               isDark,
             ),
@@ -529,6 +547,7 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   Widget _buildMainButton(bool isDark) {
+    final l10n = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: GestureDetector(
@@ -583,9 +602,9 @@ class _HomeScreenState extends State<HomeScreen>
                         ),
                       ),
                       const SizedBox(width: 10),
-                      const Text(
-                        'NEW SCOREBOARD',
-                        style: TextStyle(
+                      Text(
+                        l10n. newScoreboard,
+                        style: const TextStyle(
                           color: Colors.black,
                           fontSize: 16,
                           fontWeight: FontWeight.w900,

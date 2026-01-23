@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import '../widgets/premium_navbar.dart';
 import '../widgets/domino_background.dart';
+import '../utils/localization.dart';
 
 
 class RankingScreen extends StatefulWidget {
@@ -112,25 +113,26 @@ class _RankingScreenState extends State<RankingScreen> {
         final nameController = TextEditingController();
         final scoreController = TextEditingController();
 
+        final l10n = AppLocalizations.of(context);
         return AlertDialog(
-          title: const Text('Add Leaderboard Entry'),
+          title: Text(l10n.addPlayer),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 controller: nameController,
-                decoration: const InputDecoration(
-                  labelText: 'Player Name',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: l10n.playerName,
+                  border: const OutlineInputBorder(),
                 ),
               ),
               const SizedBox(height: 16),
               TextField(
                 controller: scoreController,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: 'Score',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: l10n.dominoScore, // "Domino Score" or "Score" if we had it. "Domino Score" is close.
+                  border: const OutlineInputBorder(),
                 ),
               ),
             ],
@@ -138,7 +140,7 @@ class _RankingScreenState extends State<RankingScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
+              child: Text(l10n.cancel),
             ),
             FilledButton(
               onPressed: () {
@@ -169,7 +171,7 @@ class _RankingScreenState extends State<RankingScreen> {
                   }
                 }
               },
-              child: const Text('Add'),
+              child: Text(l10n.add),
             ),
           ],
         );
@@ -206,6 +208,7 @@ class _RankingScreenState extends State<RankingScreen> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       body: DominoBackground(
         opacity: 0.4,
@@ -250,21 +253,21 @@ class _RankingScreenState extends State<RankingScreen> {
                       items: [
                         NavItem(
                           icon: Icons.videogame_asset_rounded,
-                          label: 'Play',
+                          label: l10n.play,
                         ),
                         NavItem(
                           icon: Icons.emoji_events_rounded,
-                          label: 'Rank',
+                          label: l10n.rank,
                         ),
                         NavItem(
                           icon: Icons.settings_rounded,
-                          label: 'Settings',
+                          label: l10n.settings,
                         ),
                         NavItem(
                           icon: Icons.help_outline_rounded,
-                          label: 'Help',
+                          label: l10n.help,
                         ),
-                        NavItem(icon: Icons.share_rounded, label: 'Share'),
+                        NavItem(icon: Icons.share_rounded, label: l10n.share),
                       ],
                       onTap: (index) {
                         switch (index) {
@@ -301,6 +304,7 @@ class _RankingScreenState extends State<RankingScreen> {
 
   Widget _buildHeader() {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Row(
@@ -308,7 +312,7 @@ class _RankingScreenState extends State<RankingScreen> {
         children: [
           Expanded(
             child: Text(
-              'RANKING',
+              l10n.rank.toUpperCase(),
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.w900,
@@ -383,7 +387,7 @@ class _RankingScreenState extends State<RankingScreen> {
         top: 16,
         bottom: MediaQuery.of(context).size.height * 0.12,
       ),
-      itemCount: _leaderboard.length,
+      itemCount: _leaderboard.length > 10 ? 10 : _leaderboard.length,
       itemBuilder: (context, index) {
         final entry = _leaderboard[index];
         final rank = index + 1;

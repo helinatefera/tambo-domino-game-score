@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../widgets/premium_navbar.dart';
 import '../widgets/domino_background.dart';
+import '../utils/localization.dart';
 
 
 class HelpScreen extends StatelessWidget {
@@ -10,6 +11,7 @@ class HelpScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       extendBody: true,
       body: DominoBackground(
@@ -45,14 +47,14 @@ class HelpScreen extends StatelessWidget {
                         children: [
                           _buildSection(
                             context,
-                            'What is Domino?',
-                            'Domino is a classic tile-based game where players match tiles with the same number of pips. The game is typically played in teams, and players score points by playing tiles that match the open ends of the layout.',
+                            l10n.whatIsDomino,
+                            l10n.whatIsDominoDesc,
                           ),
                           const SizedBox(height: 16),
                           _buildSection(
                             context,
-                            'Why This App?',
-                            'This app helps you keep track of scores during your domino games. Instead of using pen and paper, you can easily add points for each team, view scoring history, and save your game results to the leaderboard.',
+                            l10n.whyThisApp,
+                            l10n.whyThisAppDesc,
                           ),
                           const SizedBox(height: 16),
                           _buildFAQSection(context),
@@ -75,21 +77,21 @@ class HelpScreen extends StatelessWidget {
                       items: [
                         NavItem(
                           icon: Icons.videogame_asset_rounded,
-                          label: 'Play',
+                          label: l10n.play,
                         ),
                         NavItem(
                           icon: Icons.emoji_events_rounded,
-                          label: 'Rank',
+                          label: l10n.rank,
                         ),
                         NavItem(
                           icon: Icons.settings_rounded,
-                          label: 'Settings',
+                          label: l10n.settings,
                         ),
                         NavItem(
                           icon: Icons.help_outline_rounded,
-                          label: 'Help',
+                          label: l10n.help,
                         ),
-                        NavItem(icon: Icons.share_rounded, label: 'Share'),
+                        NavItem(icon: Icons.share_rounded, label: l10n.share),
                       ],
                       onTap: (index) {
                         switch (index) {
@@ -126,12 +128,13 @@ class HelpScreen extends StatelessWidget {
 
   Widget _buildHeader(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Row(
         children: [
           Text(
-            'HELP & FAQ',
+            l10n.help.toUpperCase(),
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.w900,
@@ -182,36 +185,31 @@ class HelpScreen extends StatelessWidget {
   }
 
   Widget _buildFAQSection(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final faqs = [
       {
-        'question': 'How do I add points?',
-        'answer':
-            'Tap the quick score buttons (5, 10, 15, 20) or use the + button to enter a custom score. Points are added to the team on the corresponding side.',
+        'question': l10n.faq1Q,
+        'answer': l10n.faq1A,
       },
       {
-        'question': 'Can I undo a score?',
-        'answer':
-            'Yes! Use the undo button (↶) below each team\'s score section to remove the last added score.',
+        'question': l10n.faq2Q,
+        'answer': l10n.faq2A,
       },
       {
-        'question': 'How do I reset the game?',
-        'answer':
-            'Tap the refresh icon (↻) in the top right corner of the scorer screen to reset all scores.',
+        'question': l10n.faq3Q,
+        'answer': l10n.faq3A,
       },
       {
-        'question': 'How do I save a game to the leaderboard?',
-        'answer':
-            'Go to the Ranking tab and tap the + button to add a leaderboard entry with the player name and final score.',
+        'question': l10n.faq4Q,
+        'answer': l10n.faq4A,
       },
       {
-        'question': 'Can I customize player names?',
-        'answer':
-            'Yes! Go to the Team Settings tab to set the number of players and customize their names and initial points.',
+        'question': l10n.faq5Q,
+        'answer': l10n.faq5A,
       },
       {
-        'question': 'How do I share the app?',
-        'answer':
-            'Go to the Share & Rate tab to share the app with friends or rate it on the app store.',
+        'question': l10n.faq6Q,
+        'answer': l10n.faq6A,
       },
     ];
 
@@ -229,7 +227,7 @@ class HelpScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Frequently Asked Questions',
+              l10n.faqTitle,
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,

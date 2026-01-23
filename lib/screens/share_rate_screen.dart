@@ -4,6 +4,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../widgets/premium_navbar.dart';
 import '../widgets/domino_background.dart';
+import '../utils/localization.dart';
 
 class ShareRateScreen extends StatelessWidget {
   const ShareRateScreen({super.key});
@@ -15,11 +16,9 @@ class ShareRateScreen extends StatelessWidget {
     }
   }
 
-  Future<void> _shareApp() async {
-    await Share.share(
-      'Check out this awesome Domino Score app! Keep track of your domino game scores easily.',
-      subject: 'Domino Score App',
-    );
+  Future<void> _shareApp(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
+    await Share.share(l10n.shareMessage, subject: l10n.shareSubject);
   }
 
   Future<void> _rateApp() async {
@@ -36,6 +35,7 @@ class ShareRateScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       extendBody: true,
       body: DominoBackground(
@@ -72,52 +72,29 @@ class ShareRateScreen extends StatelessWidget {
                           _buildActionCard(
                             context,
                             icon: Icons.share,
-                            title: 'Share App',
-                            subtitle: 'Share this app with your friends',
-                            onTap: _shareApp,
+                            title: l10n.shareApp,
+                            subtitle: l10n.shareAppSubtitle,
+                            onTap: () => _shareApp(context),
                           ),
                           const SizedBox(height: 16),
                           _buildActionCard(
                             context,
                             icon: Icons.star,
-                            title: 'Rate App',
-                            subtitle: 'Rate us on the app store',
+                            title: l10n.rateApp,
+                            subtitle: l10n.rateAppSubtitle,
                             onTap: _rateApp,
                           ),
                           const SizedBox(height: 16),
                           _buildActionCard(
                             context,
-                            icon: Icons.feedback,
-                            title: 'Send Feedback',
-                            subtitle: 'Help us improve the app',
-                            onTap: () {
-                              final email = 'feedback@domino-scorer.com';
-                              _launchURL('mailto:$email?subject=Feedback');
-                            },
-                          ),
-                          const SizedBox(height: 16),
-                          _buildActionCard(
-                            context,
                             icon: Icons.info,
-                            title: 'About',
-                            subtitle: 'App version and information',
+                            title: l10n.about,
+                            subtitle: l10n.aboutSubtitle,
                             onTap: () {
-                              showDialog(
-                                context: context,
-                                builder: (context) => AlertDialog(
-                                  title: const Text('About'),
-                                  content: const Text(
-                                    'Domino Score v1.0.0\n\n'
-                                    'A simple and elegant way to keep track of your domino game scores.\n\n'
-                                    'Made with ❤️ for domino enthusiasts.',
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () => Navigator.pop(context),
-                                      child: const Text('Close'),
-                                    ),
-                                  ],
-                                ),
+                              _showInfoDialog(
+                                context,
+                                l10n.about,
+                                l10n.aboutContent,
                               );
                             },
                           ),
@@ -125,22 +102,28 @@ class ShareRateScreen extends StatelessWidget {
                           _buildActionCard(
                             context,
                             icon: Icons.privacy_tip,
-                            title: 'Privacy Policy',
-                            subtitle: 'View our privacy policy',
+                            title: l10n.privacyPolicy,
+                            subtitle: l10n.privacyPolicySubtitle,
                             onTap: () {
-                              // Replace with your actual privacy policy URL
-                              _launchURL('https://example.com/privacy');
+                              _showInfoDialog(
+                                context,
+                                l10n.privacyPolicy,
+                                l10n.privacyPolicyContent,
+                              );
                             },
                           ),
                           const SizedBox(height: 16),
                           _buildActionCard(
                             context,
                             icon: Icons.description,
-                            title: 'Terms of Service',
-                            subtitle: 'View terms and conditions',
+                            title: l10n.termsOfService,
+                            subtitle: l10n.termsOfServiceSubtitle,
                             onTap: () {
-                              // Replace with your actual terms URL
-                              _launchURL('https://example.com/terms');
+                              _showInfoDialog(
+                                context,
+                                l10n.termsOfService,
+                                l10n.termsOfServiceContent,
+                              );
                             },
                           ),
                         ],
@@ -161,21 +144,21 @@ class ShareRateScreen extends StatelessWidget {
                       items: [
                         NavItem(
                           icon: Icons.videogame_asset_rounded,
-                          label: 'Play',
+                          label: l10n.play,
                         ),
                         NavItem(
                           icon: Icons.emoji_events_rounded,
-                          label: 'Rank',
+                          label: l10n.rank,
                         ),
                         NavItem(
                           icon: Icons.settings_rounded,
-                          label: 'Settings',
+                          label: l10n.settings,
                         ),
                         NavItem(
                           icon: Icons.help_outline_rounded,
-                          label: 'Help',
+                          label: l10n.help,
                         ),
-                        NavItem(icon: Icons.share_rounded, label: 'Share'),
+                        NavItem(icon: Icons.share_rounded, label: l10n.share),
                       ],
                       onTap: (index) {
                         switch (index) {
@@ -212,12 +195,13 @@ class ShareRateScreen extends StatelessWidget {
 
   Widget _buildHeader(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Row(
         children: [
           Text(
-            'SHARE & RATE',
+            l10n.share.toUpperCase(),
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.w900,
@@ -263,6 +247,23 @@ class ShareRateScreen extends StatelessWidget {
           color: colorScheme.onSurface.withValues(alpha: 0.3),
         ),
         onTap: onTap,
+      ),
+    );
+  }
+
+  void _showInfoDialog(BuildContext context, String title, String content) {
+    final l10n = AppLocalizations.of(context);
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(title),
+        content: SingleChildScrollView(child: Text(content)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(l10n.close),
+          ),
+        ],
       ),
     );
   }

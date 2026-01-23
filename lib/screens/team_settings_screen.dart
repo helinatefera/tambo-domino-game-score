@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import '../main.dart';
+import '../utils/localization.dart';
 import '../widgets/premium_navbar.dart';
 import '../widgets/domino_background.dart';
-
 
 class TeamSettingsScreen extends StatefulWidget {
   const TeamSettingsScreen({super.key});
@@ -140,15 +140,16 @@ class _TeamSettingsScreenState extends State<TeamSettingsScreen> {
   }
 
   void _addPlayer() {
+    final l10n = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Add Player'),
+        title: Text(l10n.addPlayer),
         content: TextField(
           controller: _newPlayerNameController,
-          decoration: const InputDecoration(
-            labelText: 'Player Name',
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            labelText: l10n.playerName,
+            border: const OutlineInputBorder(),
           ),
         ),
         actions: [
@@ -157,7 +158,7 @@ class _TeamSettingsScreenState extends State<TeamSettingsScreen> {
               _newPlayerNameController.clear();
               Navigator.pop(context);
             },
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           FilledButton(
             onPressed: () {
@@ -170,7 +171,7 @@ class _TeamSettingsScreenState extends State<TeamSettingsScreen> {
                 Navigator.pop(context);
               }
             },
-            child: const Text('Add'),
+            child: Text(l10n.add),
           ),
         ],
       ),
@@ -193,6 +194,8 @@ class _TeamSettingsScreenState extends State<TeamSettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context);
+
     return Scaffold(
       extendBody: true,
       body: DominoBackground(
@@ -234,6 +237,10 @@ class _TeamSettingsScreenState extends State<TeamSettingsScreen> {
                                 children: [
                                   const SizedBox(height: 20),
                                   _buildGlassCard(
+                                    child: _buildLanguageSection(),
+                                  ),
+                                  const SizedBox(height: 20),
+                                  _buildGlassCard(
                                     child: _buildNumberOfPlayersSection(),
                                   ),
                                   const SizedBox(height: 20),
@@ -259,27 +266,26 @@ class _TeamSettingsScreenState extends State<TeamSettingsScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-
                     PremiumGlassNavbar(
                       currentIndex: 2,
                       items: [
                         NavItem(
                           icon: Icons.videogame_asset_rounded,
-                          label: 'Play',
+                          label: l10n.play,
                         ),
                         NavItem(
                           icon: Icons.emoji_events_rounded,
-                          label: 'Rank',
+                          label: l10n.rank,
                         ),
                         NavItem(
                           icon: Icons.settings_rounded,
-                          label: 'Settings',
+                          label: l10n.settings,
                         ),
                         NavItem(
                           icon: Icons.help_outline_rounded,
-                          label: 'Help',
+                          label: l10n.help,
                         ),
-                        NavItem(icon: Icons.share_rounded, label: 'Share'),
+                        NavItem(icon: Icons.share_rounded, label: l10n.share),
                       ],
                       onTap: (index) {
                         switch (index) {
@@ -325,6 +331,7 @@ class _TeamSettingsScreenState extends State<TeamSettingsScreen> {
   }
 
   Widget _buildHeader() {
+    final l10n = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
       child: Row(
@@ -337,35 +344,96 @@ class _TeamSettingsScreenState extends State<TeamSettingsScreen> {
             ),
             onPressed: () => Navigator.pop(context),
           ),
-          const Text(
-            'Settings',
-            style: TextStyle(
+          Text(
+            l10n.settings,
+            style: const TextStyle(
               fontSize: 32,
               fontWeight: FontWeight.w900,
               color: Colors.white,
               letterSpacing: 1.5,
             ),
           ),
-          IconButton(
-            icon: const Icon(Icons.palette_rounded, color: Colors.white),
-            onPressed: toggleTheme,
-          ),
         ],
       ),
     );
   }
 
-  Widget _buildNumberOfPlayersSection() {
+  Widget _buildLanguageSection() {
+    final l10n = AppLocalizations.of(context);
+    final isEnglish =
+        AppLocalizations.languageNotifier.value.languageCode == 'en';
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Row(
+        Row(
           children: [
-            Icon(Icons.groups_rounded, color: Colors.white70, size: 24),
-            SizedBox(width: 12),
+            const Icon(Icons.language_rounded, color: Colors.white70, size: 24),
+            const SizedBox(width: 12),
             Text(
-              'Number of Players',
-              style: TextStyle(
+              l10n.language,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 20),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            _buildLanguageOption('English', 'en', isEnglish),
+            _buildLanguageOption('Español', 'es', !isEnglish),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLanguageOption(String label, String code, bool isSelected) {
+    return InkWell(
+      onTap: () {
+        AppLocalizations.languageNotifier.value = Locale(code);
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? Colors.white
+              : Colors.white.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected
+                ? Colors.transparent
+                : Colors.white.withValues(alpha: 0.3),
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isSelected ? Colors.black : Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNumberOfPlayersSection() {
+    final l10n = AppLocalizations.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Icon(Icons.groups_rounded, color: Colors.white70, size: 24),
+            const SizedBox(width: 12),
+            Text(
+              l10n.numberOfPlayers,
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
@@ -418,20 +486,21 @@ class _TeamSettingsScreenState extends State<TeamSettingsScreen> {
   }
 
   Widget _buildTargetScoreSection() {
+    final l10n = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Row(
+        Row(
           children: [
-            Icon(
+            const Icon(
               Icons.emoji_events_rounded,
               color: Colors.amberAccent,
               size: 24,
             ),
-            SizedBox(width: 12),
+            const SizedBox(width: 12),
             Text(
-              'Win Condition',
-              style: TextStyle(
+              l10n.winCondition,
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
@@ -448,8 +517,8 @@ class _TeamSettingsScreenState extends State<TeamSettingsScreen> {
               children: [
                 Text(
                   _targetScore == 0
-                      ? 'Infinite Points'
-                      : 'Target: $_targetScore Points',
+                      ? l10n.infinitePoints
+                      : l10n.targetPoints(_targetScore),
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 16,
@@ -457,7 +526,7 @@ class _TeamSettingsScreenState extends State<TeamSettingsScreen> {
                   ),
                 ),
                 Text(
-                  'Reach this score to win the game',
+                  l10n.reachScoreMessage,
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.6),
                     fontSize: 12,
@@ -491,19 +560,24 @@ class _TeamSettingsScreenState extends State<TeamSettingsScreen> {
   }
 
   Widget _buildPlayersSection() {
+    final l10n = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Row(
+            Row(
               children: [
-                Icon(Icons.person_rounded, color: Colors.white70, size: 24),
-                SizedBox(width: 12),
+                const Icon(
+                  Icons.person_rounded,
+                  color: Colors.white70,
+                  size: 24,
+                ),
+                const SizedBox(width: 12),
                 Text(
-                  'Players',
-                  style: TextStyle(
+                  l10n.players,
+                  style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
@@ -533,7 +607,7 @@ class _TeamSettingsScreenState extends State<TeamSettingsScreen> {
               onChanged: (_) => _saveSettings(),
               style: const TextStyle(color: Colors.white, fontSize: 18),
               decoration: InputDecoration(
-                labelText: 'Player ${index + 1} Name',
+                labelText: l10n.indexedPlayerName(index + 1),
                 labelStyle: TextStyle(
                   color: Colors.white.withValues(alpha: 0.7),
                 ),

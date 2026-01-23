@@ -5,6 +5,8 @@ import '../main.dart';
 import 'ranking_screen.dart';
 import '../widgets/premium_navbar.dart';
 import '../widgets/domino_background.dart';
+import '../utils/localization.dart';
+import 'package:confetti/confetti.dart';
 
 
 class ScorerScreen extends StatefulWidget {
@@ -21,10 +23,12 @@ class ScorerScreenState extends State<ScorerScreen> {
   int _targetScore = 100;
   bool _isLoading = true;
   bool _hasWinner = false;
+  late ConfettiController _confettiController;
   final List<TextEditingController> _scoreControllers = [];
 
   @override
   void dispose() {
+    _confettiController.dispose();
     for (var controller in _scoreControllers) {
       controller.dispose();
     }
@@ -34,6 +38,9 @@ class ScorerScreenState extends State<ScorerScreen> {
   @override
   void initState() {
     super.initState();
+    _confettiController = ConfettiController(
+      duration: const Duration(seconds: 3),
+    );
     // Load data immediately
     _loadInitialData();
   }
@@ -55,7 +62,11 @@ class ScorerScreenState extends State<ScorerScreen> {
     }
 
     while (names.length < numPlayers) {
-      names.add('Player ${names.length + 1}');
+      names.add(
+        AppLocalizations(
+          AppLocalizations.languageNotifier.value,
+        ).playerDefaultName(names.length + 1),
+      );
     }
     if (names.length > numPlayers) {
       names = names.sublist(0, numPlayers);
@@ -91,7 +102,11 @@ class ScorerScreenState extends State<ScorerScreen> {
     }
 
     while (names.length < numPlayers) {
-      names.add('Player ${names.length + 1}');
+      names.add(
+        AppLocalizations(
+          AppLocalizations.languageNotifier.value,
+        ).playerDefaultName(names.length + 1),
+      );
     }
     if (names.length > numPlayers) {
       names = names.sublist(0, numPlayers);
@@ -148,6 +163,7 @@ class ScorerScreenState extends State<ScorerScreen> {
         _hasWinner = true;
         await _saveWinnerToRanking(_playerNames[i], total);
         if (!silent) {
+          _confettiController.play();
           _showWinnerCelebration(_playerNames[i]);
         }
         break;
@@ -208,6 +224,7 @@ class ScorerScreenState extends State<ScorerScreen> {
   }
 
   void _showWinnerCelebration(String winnerName) {
+    final l10n = AppLocalizations.of(context);
     showGeneralDialog(
       context: context,
       barrierDismissible: false,
@@ -216,90 +233,109 @@ class ScorerScreenState extends State<ScorerScreen> {
       pageBuilder: (context, anim1, anim2) {
         return Scaffold(
           backgroundColor: Colors.transparent,
-          body: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                TweenAnimationBuilder<double>(
-                  duration: const Duration(seconds: 1),
-                  tween: Tween(begin: 0, end: 1),
-                  builder: (context, value, child) {
-                    return Transform.scale(
-                      scale: value,
-                      child: Opacity(opacity: value, child: child),
-                    );
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.all(30),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.amber.withValues(alpha: 0.15),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.amber.withValues(alpha: 0.2),
-                          blurRadius: 50,
-                          spreadRadius: 20,
+          body: Stack(
+            children: [
+              Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    TweenAnimationBuilder<double>(
+                      duration: const Duration(seconds: 1),
+                      tween: Tween(begin: 0, end: 1),
+                      builder: (context, value, child) {
+                        return Transform.scale(
+                          scale: value,
+                          child: Opacity(opacity: value, child: child),
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(30),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.amber.withValues(alpha: 0.15),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.amber.withValues(alpha: 0.2),
+                              blurRadius: 50,
+                              spreadRadius: 20,
+                            ),
+                          ],
                         ),
-                      ],
+                        child: const Icon(
+                          Icons.emoji_events_rounded,
+                          size: 100,
+                          color: Colors.amber,
+                        ),
+                      ),
                     ),
-                    child: const Icon(
-                      Icons.emoji_events_rounded,
-                      size: 100,
-                      color: Colors.amber,
+                    const SizedBox(height: 40),
+                    Text(
+                      l10n.victory,
+                      style: const TextStyle(
+                        fontSize: 42,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 8,
+                        color: Colors.white,
+                      ),
                     ),
-                  ),
-                ),
-                const SizedBox(height: 40),
-                const Text(
-                  'VICTORY!',
-                  style: TextStyle(
-                    fontSize: 42,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 8,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  winnerName.toUpperCase(),
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w300,
-                    letterSpacing: 2,
-                    color: Colors.amber.shade200,
-                  ),
-                ),
-                const SizedBox(height: 60),
-                FilledButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                    _reset();
-                  },
-                  style: FilledButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: Colors.black,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 40,
-                      vertical: 15,
+                    const SizedBox(height: 10),
+                    Text(
+                      winnerName.toUpperCase(),
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w300,
+                        letterSpacing: 2,
+                        color: Colors.amber.shade200,
+                      ),
                     ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
+                    const SizedBox(height: 60),
+                    FilledButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _reset();
+                      },
+                      style: FilledButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: Colors.black,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 40,
+                          vertical: 15,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                      ),
+                      child: Text(
+                        l10n.newGame,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
                     ),
-                  ),
-                  child: const Text(
-                    'NEW GAME',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: Text(
+                        l10n.backToScoreboard,
+                        style: const TextStyle(color: Colors.white38),
+                      ),
+                    ),
+                  ],
                 ),
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text(
-                    'BACK TO SCOREBOARD',
-                    style: TextStyle(color: Colors.white38),
-                  ),
+              ),
+              Align(
+                alignment: Alignment.topCenter,
+                child: ConfettiWidget(
+                  confettiController: _confettiController,
+                  blastDirectionality: BlastDirectionality.explosive,
+                  shouldLoop: false,
+                  colors: const [
+                    Colors.green,
+                    Colors.blue,
+                    Colors.pink,
+                    Colors.orange,
+                    Colors.purple,
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         );
       },
@@ -358,6 +394,7 @@ class ScorerScreenState extends State<ScorerScreen> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       extendBody: true,
       body: DominoBackground(
@@ -435,9 +472,9 @@ class ScorerScreenState extends State<ScorerScreen> {
                                             ),
                                           ),
                                         ),
-                                        child: const Text(
-                                          'Add Round',
-                                          style: TextStyle(
+                                        child: Text(
+                                          l10n.addRound,
+                                          style: const TextStyle(
                                             fontSize: 18,
                                             fontWeight: FontWeight.bold,
                                           ),
@@ -467,21 +504,21 @@ class ScorerScreenState extends State<ScorerScreen> {
                       items: [
                         NavItem(
                           icon: Icons.videogame_asset_rounded,
-                          label: 'Play',
+                          label: l10n.play,
                         ),
                         NavItem(
                           icon: Icons.emoji_events_rounded,
-                          label: 'Rank',
+                          label: l10n.rank,
                         ),
                         NavItem(
                           icon: Icons.settings_rounded,
-                          label: 'Settings',
+                          label: l10n.settings,
                         ),
                         NavItem(
                           icon: Icons.help_outline_rounded,
-                          label: 'Help',
+                          label: l10n.help,
                         ),
-                        NavItem(icon: Icons.share_rounded, label: 'Share'),
+                        NavItem(icon: Icons.share_rounded, label: l10n.share),
                       ],
                       onTap: (index) async {
                         switch (index) {
@@ -528,14 +565,15 @@ class ScorerScreenState extends State<ScorerScreen> {
   }
 
   Widget _buildHeader() {
+    final l10n = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Text(
-            'Scorer',
-            style: TextStyle(
+          Text(
+            l10n.scorer,
+            style: const TextStyle(
               fontSize: 32,
               fontWeight: FontWeight.w900,
               color: Colors.white,
@@ -547,10 +585,6 @@ class ScorerScreenState extends State<ScorerScreen> {
               IconButton(
                 icon: const Icon(Icons.refresh_rounded, color: Colors.white),
                 onPressed: _reset,
-              ),
-              IconButton(
-                icon: const Icon(Icons.palette_rounded, color: Colors.white),
-                onPressed: toggleTheme,
               ),
             ],
           ),
@@ -600,6 +634,7 @@ class ScorerScreenState extends State<ScorerScreen> {
   }
 
   Widget _buildRoundsTable() {
+    final l10n = AppLocalizations.of(context);
     final List<int> totals = _playerScores
         .map((scores) => scores.fold(0, (a, b) => a + b))
         .toList();
@@ -611,11 +646,11 @@ class ScorerScreenState extends State<ScorerScreen> {
       children: [
         Row(
           children: [
-            const Expanded(
+            Expanded(
               flex: 2,
               child: Text(
-                'TOTAL',
-                style: TextStyle(
+                l10n.total,
+                style: const TextStyle(
                   color: Colors.white70,
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
