@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
-import '../main.dart';
-import 'ranking_screen.dart';
+import '../services/npoint_service.dart';
 import '../widgets/premium_navbar.dart';
 import '../widgets/domino_background.dart';
 import '../utils/localization.dart';
@@ -173,53 +172,18 @@ class ScorerScreenState extends State<ScorerScreen> {
 
   Future<void> _saveWinnerToRanking(String playerName, int finalScore) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final leaderboardJson = prefs.getString('leaderboard');
-
-      List<LeaderboardEntry> leaderboard = [];
-      if (leaderboardJson != null) {
-        final List<dynamic> decoded = json.decode(leaderboardJson);
-        leaderboard = decoded
-            .map((entry) => LeaderboardEntry.fromJson(entry))
-            .toList();
-      }
-
-      final existingIndex = leaderboard.indexWhere(
-        (entry) => entry.playerName.toLowerCase() == playerName.toLowerCase(),
-      );
-
-      if (existingIndex >= 0) {
-        final existing = leaderboard[existingIndex];
-        leaderboard[existingIndex] = LeaderboardEntry(
-          playerName: existing.playerName,
-          winCount: existing.winCount + 1,
-          totalScore: existing.totalScore + finalScore,
-          lastWinDate: DateTime.now(),
-          firstWinDate: existing.firstWinDate,
-        );
+      // Save to npoint.io (will automatically keep only top 10)
+      final success = await NPointService.addWinner(playerName, finalScore);
+      
+      if (success) {
+        debugPrint('Winner saved successfully to npoint.io!');
+        debugPrint('Saved entry: Player: $playerName, Score: $finalScore');
       } else {
-        leaderboard.add(
-          LeaderboardEntry(
-            playerName: playerName,
-            winCount: 1,
-            totalScore: finalScore,
-            lastWinDate: DateTime.now(),
-            firstWinDate: DateTime.now(),
-          ),
-        );
+        debugPrint('Failed to save winner to npoint.io. Check configuration.');
       }
-
-      leaderboard.sort((a, b) {
-        if (b.winCount != a.winCount) return b.winCount.compareTo(a.winCount);
-        return b.totalScore.compareTo(a.totalScore);
-      });
-
-      await prefs.setString(
-        'leaderboard',
-        json.encode(leaderboard.map((e) => e.toJson()).toList()),
-      );
     } catch (e) {
       debugPrint('Error saving winner to ranking: $e');
+      debugPrint('Stack trace: ${StackTrace.current}');
     }
   }
 

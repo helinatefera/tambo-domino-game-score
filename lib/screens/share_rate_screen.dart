@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:in_app_review/in_app_review.dart';
 
 import '../widgets/premium_navbar.dart';
 import '../widgets/domino_background.dart';
@@ -22,14 +23,21 @@ class ShareRateScreen extends StatelessWidget {
   }
 
   Future<void> _rateApp() async {
-    // Replace with your actual app store URLs
-    const androidUrl =
-        'https://play.google.com/store/apps/details?id=com.tambo71.domino_score';
-    // const iosUrl = 'https://apps.apple.com/app/id123456789';
+    final InAppReview inAppReview = InAppReview.instance;
 
-    // You can detect platform and use appropriate URL
-    // For now, using Android URL
-    await _launchURL(androidUrl);
+    if (await inAppReview.isAvailable()) {
+      await inAppReview.requestReview();
+    } else {
+      // Fallback to opening store listing
+      // Replace with your actual app store URLs
+      const androidUrl =
+          'https://play.google.com/store/apps/details?id=com.tambo71.domino_score';
+      // const iosUrl = 'https://apps.apple.com/app/id123456789';
+
+      // You can detect platform and use appropriate URL
+      // For now, using Android URL
+      await _launchURL(androidUrl);
+    }
   }
 
   @override

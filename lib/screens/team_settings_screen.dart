@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
-import '../main.dart';
 import '../utils/localization.dart';
 import '../widgets/premium_navbar.dart';
 import '../widgets/domino_background.dart';

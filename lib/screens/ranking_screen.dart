@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert';
+import '../models/leaderboard_entry.dart';
+import '../services/npoint_service.dart';
 import '../widgets/premium_navbar.dart';
 import '../widgets/domino_background.dart';
 import '../utils/localization.dart';
@@ -18,50 +18,10 @@ class RankingScreen extends StatefulWidget {
   }
 }
 
-class LeaderboardEntry {
-  final String playerName;
-  final int winCount;
-  final int totalScore;
-  final DateTime lastWinDate;
-  final DateTime firstWinDate;
-
-  LeaderboardEntry({
-    required this.playerName,
-    required this.winCount,
-    required this.totalScore,
-    required this.lastWinDate,
-    required this.firstWinDate,
-  });
-
-  Map<String, dynamic> toJson() => {
-    'playerName': playerName,
-    'winCount': winCount,
-    'totalScore': totalScore,
-    'lastWinDate': lastWinDate.toIso8601String(),
-    'firstWinDate': firstWinDate.toIso8601String(),
-  };
-
-  factory LeaderboardEntry.fromJson(Map<String, dynamic> json) =>
-      LeaderboardEntry(
-        playerName: json['playerName'],
-        winCount: json['winCount'] ?? 1, // For backward compatibility
-        totalScore:
-            json['totalScore'] ?? json['score'] ?? 0, // Support old format
-        lastWinDate: json['lastWinDate'] != null
-            ? DateTime.parse(json['lastWinDate'])
-            : (json['date'] != null
-                  ? DateTime.parse(json['date'])
-                  : DateTime.now()),
-        firstWinDate: json['firstWinDate'] != null
-            ? DateTime.parse(json['firstWinDate'])
-            : (json['date'] != null
-                  ? DateTime.parse(json['date'])
-                  : DateTime.now()),
-      );
-}
-
 class _RankingScreenState extends State<RankingScreen> {
   List<LeaderboardEntry> _leaderboard = [];
+  bool _isLoading = true;
+  String? _errorMessage;
 
   @override
   void initState() {
@@ -79,130 +39,28 @@ class _RankingScreenState extends State<RankingScreen> {
   }
 
   Future<void> _loadLeaderboard() async {
-    final prefs = await SharedPreferences.getInstance();
-    final leaderboardJson = prefs.getString('leaderboard');
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
 
-    if (leaderboardJson != null) {
-      final List<dynamic> decoded = json.decode(leaderboardJson);
+    try {
+      final leaderboard = await NPointService.fetchLeaderboard();
+      
       setState(() {
-        _leaderboard =
-            decoded.map((entry) => LeaderboardEntry.fromJson(entry)).toList()
-              ..sort((a, b) {
-                // Sort by win count first, then by total score
-                if (b.winCount != a.winCount) {
-                  return b.winCount.compareTo(a.winCount);
-                }
-                return b.totalScore.compareTo(a.totalScore);
-              });
+        _leaderboard = leaderboard;
+        _isLoading = false;
+      });
+      
+      debugPrint('Loaded ${_leaderboard.length} entries from npoint.io');
+    } catch (e) {
+      debugPrint('Error loading leaderboard: $e');
+      setState(() {
+        _leaderboard = [];
+        _isLoading = false;
+        _errorMessage = 'Failed to load leaderboard. Please check your internet connection.';
       });
     }
-  }
-
-  Future<void> _saveLeaderboard() async {
-    final prefs = await SharedPreferences.getInstance();
-    final leaderboardJson = json.encode(
-      _leaderboard.map((entry) => entry.toJson()).toList(),
-    );
-    await prefs.setString('leaderboard', leaderboardJson);
-  }
-
-  void _addTestEntry() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        final nameController = TextEditingController();
-        final scoreController = TextEditingController();
-
-        final l10n = AppLocalizations.of(context);
-        return AlertDialog(
-          title: Text(l10n.addPlayer),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: nameController,
-                decoration: InputDecoration(
-                  labelText: l10n.playerName,
-                  border: const OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: scoreController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: l10n.dominoScore, // "Domino Score" or "Score" if we had it. "Domino Score" is close.
-                  border: const OutlineInputBorder(),
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(l10n.cancel),
-            ),
-            FilledButton(
-              onPressed: () {
-                if (nameController.text.isNotEmpty &&
-                    scoreController.text.isNotEmpty) {
-                  final score = int.tryParse(scoreController.text);
-                  if (score != null) {
-                    setState(() {
-                      final now = DateTime.now();
-                      _leaderboard.add(
-                        LeaderboardEntry(
-                          playerName: nameController.text,
-                          winCount: 1,
-                          totalScore: score,
-                          lastWinDate: now,
-                          firstWinDate: now,
-                        ),
-                      );
-                      _leaderboard.sort((a, b) {
-                        if (b.winCount != a.winCount) {
-                          return b.winCount.compareTo(a.winCount);
-                        }
-                        return b.totalScore.compareTo(a.totalScore);
-                      });
-                    });
-                    _saveLeaderboard();
-                    Navigator.pop(context);
-                  }
-                }
-              },
-              child: Text(l10n.add),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _clearLeaderboard() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Clear Leaderboard?'),
-        content: const Text('This will delete all saved leaderboard entries.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () {
-              setState(() {
-                _leaderboard.clear();
-              });
-              _saveLeaderboard();
-              Navigator.pop(context);
-            },
-            child: const Text('Clear'),
-          ),
-        ],
-      ),
-    );
   }
 
   @override
@@ -233,9 +91,13 @@ class _RankingScreenState extends State<RankingScreen> {
                   children: [
                     _buildHeader(),
                     Expanded(
-                      child: _leaderboard.isEmpty
-                          ? _buildEmptyState()
-                          : _buildLeaderboardList(),
+                      child: _isLoading
+                          ? _buildLoadingState()
+                          : _errorMessage != null
+                              ? _buildErrorState()
+                              : _leaderboard.isEmpty
+                                  ? _buildEmptyState()
+                                  : _buildLeaderboardList(),
                     ),
                   ],
                 ),
@@ -321,26 +183,66 @@ class _RankingScreenState extends State<RankingScreen> {
               ),
             ),
           ),
-          Row(
-            children: [
-              IconButton(
-                onPressed: _addTestEntry,
-                icon: Icon(
-                  Icons.add_circle_outline,
-                  color: colorScheme.onSurface.withValues(alpha: 0.7),
-                ),
-                tooltip: 'Add Entry',
-              ),
-              if (_leaderboard.isNotEmpty)
-                IconButton(
-                  onPressed: _clearLeaderboard,
-                  icon: Icon(
-                    Icons.delete_outline,
-                    color: colorScheme.onSurface.withValues(alpha: 0.7),
-                  ),
-                  tooltip: 'Clear Leaderboard',
-                ),
-            ],
+          IconButton(
+            onPressed: _loadLeaderboard,
+            icon: Icon(
+              Icons.refresh,
+              color: colorScheme.onSurface.withValues(alpha: 0.7),
+            ),
+            tooltip: 'Refresh Leaderboard',
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLoadingState() {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          CircularProgressIndicator(
+            color: colorScheme.primary,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Loading leaderboard...',
+            style: TextStyle(
+              fontSize: 16,
+              color: colorScheme.onSurface.withValues(alpha: 0.7),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorState() {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.error_outline,
+            size: 80,
+            color: colorScheme.error.withValues(alpha: 0.7),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            _errorMessage ?? 'Error loading leaderboard',
+            style: TextStyle(
+              fontSize: 16,
+              color: colorScheme.onSurface.withValues(alpha: 0.7),
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          FilledButton.icon(
+            onPressed: _loadLeaderboard,
+            icon: const Icon(Icons.refresh),
+            label: const Text('Retry'),
           ),
         ],
       ),
@@ -368,7 +270,7 @@ class _RankingScreenState extends State<RankingScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Add entries to track top scores',
+            'Top 10 winners will appear here',
             style: TextStyle(
               fontSize: 14,
               color: colorScheme.onSurface.withValues(alpha: 0.3),
@@ -387,7 +289,7 @@ class _RankingScreenState extends State<RankingScreen> {
         top: 16,
         bottom: MediaQuery.of(context).size.height * 0.12,
       ),
-      itemCount: _leaderboard.length > 10 ? 10 : _leaderboard.length,
+      itemCount: _leaderboard.length,
       itemBuilder: (context, index) {
         final entry = _leaderboard[index];
         final rank = index + 1;

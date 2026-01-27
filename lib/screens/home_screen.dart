@@ -2,11 +2,10 @@ import 'package:domino_scorer/widgets/ads_helper.dart';
 import 'package:flutter/material.dart';
 import '../utils/localization.dart';
 import 'dart:ui';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert';
 import '../widgets/premium_navbar.dart';
 import '../widgets/domino_background.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import '../services/npoint_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -25,6 +24,7 @@ class _HomeScreenState extends State<HomeScreen>
   String _topWinnerName = '-';
   // for banner ad
   BannerAd? _bannerAd;
+  String? _adLoadingError;
 
   Widget _buildNavItems(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -66,12 +66,17 @@ class _HomeScreenState extends State<HomeScreen>
       adUnitId: AdHelper.bannerAdUnitId,
       listener: BannerAdListener(
         onAdLoaded: (ad) {
+          debugPrint('Banner Ad loaded successfully');
           setState(() {
             _bannerAd = ad as BannerAd;
+            _adLoadingError = null;
           });
         },
         onAdFailedToLoad: (ad, error) {
           debugPrint("Failed to load banner ad: ${error.message}");
+          setState(() {
+            _adLoadingError = error.message;
+          });
           ad.dispose();
         },
       ),
@@ -108,25 +113,19 @@ class _HomeScreenState extends State<HomeScreen>
 
   Future<void> _loadStats() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final leaderboardJson = prefs.getString('leaderboard');
+      // Fetch leaderboard from npoint.io
+      final leaderboard = await NPointService.fetchLeaderboard();
 
       int totalGames = 0;
       String topWinner = '-';
       int maxWins = -1;
 
-      if (leaderboardJson != null) {
-        final List<dynamic> decoded = json.decode(leaderboardJson);
-        for (var entry in decoded) {
-          final winCount = (entry['winCount'] ?? 1) as int;
-          final playerName = entry['playerName'] as String;
-          
-          totalGames += winCount;
-          
-          if (winCount > maxWins) {
-            maxWins = winCount;
-            topWinner = playerName;
-          }
+      for (var entry in leaderboard) {
+        totalGames += entry.winCount;
+        
+        if (entry.winCount > maxWins) {
+          maxWins = entry.winCount;
+          topWinner = entry.playerName;
         }
       }
 
@@ -194,22 +193,37 @@ class _HomeScreenState extends State<HomeScreen>
                           _buildStatsCards(isDark),
                           const SizedBox(height: 16),
                           _buildMainButton(isDark),
-                          const Spacer(),
+                          const SizedBox(height: 20),
                           if (_bannerAd != null)
                             Container(
                               alignment: Alignment.center,
                               width: _bannerAd!.size.width.toDouble(),
                               height: _bannerAd!.size.height.toDouble(),
                               child: AdWidget(ad: _bannerAd!),
-                            ),
-                          // Ensure enough space for navbar
-                          const SizedBox(height: 100),
+                            )
+                          else if (_adLoadingError != null)
+                            Container(
+                                padding: const EdgeInsets.all(8),
+                                color: Colors.amberAccent,
+                                child: Text("Ad Error: $_adLoadingError", style: TextStyle(color: Colors.black)))
+                          else
+                             Container(
+                                width: 320, 
+                                height: 50, 
+                                color: Colors.blueGrey, 
+                                alignment: Alignment.center,
+                                child: const Text("Loading Ad...", style: TextStyle(color: Colors.white))
+                             ),
+                          const Spacer(),
+                          // Ensure enough space for navbar (100)
+                          const SizedBox(height: 120),
                         ],
                       );
                     },
                   ),
                 ),
               ),
+
               Positioned(
                 bottom: 0,
                 left: 0,
